@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?>
+ 
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="dev.mvc.management.ManagementDAOInter">
+  <!-- 등록 -->
+  <insert id="create" parameterType="ManagementVO">
+  
+  INSERT INTO management(managementno, paymentno, management_state )
+VALUES(  (SELECT NVL(MAX(managementno), 0) +1 AS managementno FROM management), #{paymentno}, '인수대기' )
+  
+  </insert>
+
+ <select id="list" resultType="ManagementVO" >
+ select m.managementno, p.payment_price, p.userno, r.reservation_state,
+r.rdate, t.startday, t.endday, t.scheduleday, t.startplace, t.endplace, c.carname, c.condition, m.management_state
+from MANAGEMENT m, PAYMENT p, reservation r, RENTPERIOD t, carrent c
+where m.paymentno = p.paymentno and p.reservationno = r.reservationno
+and r.rentno = t.rentno and p.payment_cancel = 'N' and t.carrentno = c.carrentno
+ </select>
+
+
+
+<select id="list_paging" resultType="ManagementVO" parameterType="HashMap">
+  select managementno, payment_price, userno, reservation_state, management_state, rentno,
+              rdate, startday, endday, scheduleday, startplace, endplace, carname, carrentno, condition, r
+    from(
+    select m.managementno, p.payment_price, p.userno, r.reservation_state, m.management_state,
+              r.rdate, t.startday, t.endday, t.scheduleday, t.startplace, t.endplace, t.rentno, c.carname, c.condition, c.carrentno, rownum as r
+    from MANAGEMENT m, PAYMENT p, reservation r, RENTPERIOD t, carrent c
+    where m.paymentno = p.paymentno and p.reservationno = r.reservationno and r.rentno = t.rentno
+              and p.payment_cancel = 'N' and t.carrentno = c.carrentno
+  ) where <![CDATA[ r >= #{startNum} and r <= #{endNum} ]]>
+</select>
+
+<select id="list_paging_search" resultType="ManagementVO" parameterType="HashMap">
+  select managementno, payment_price, userno, reservation_state, management_state, rentno,
+              rdate, startday, endday, scheduleday, startplace, endplace, carname, carrentno, condition, r
+    from(
+    select m.managementno, p.payment_price, p.userno, r.reservation_state, m.management_state,
+              r.rdate, t.startday, t.endday, t.scheduleday, t.startplace, t.endplace, t.rentno, c.carname, c.condition, c.carrentno, rownum as r
+    from MANAGEMENT m, PAYMENT p, reservation r, RENTPERIOD t, carrent c
+    <choose>
+      <when test="col == 'carname' ">
+          where m.paymentno = p.paymentno and p.reservationno = r.reservationno and r.rentno = t.rentno
+              and p.payment_cancel = 'N' and t.carrentno = c.carrentno and c.carname LIKE '%' || #{word} || '%' 
+      </when>
+      <when test="col == 'startplace' ">
+          where m.paymentno = p.paymentno and p.reservationno = r.reservationno and r.rentno = t.rentno
+              and p.payment_cancel = 'N' and t.carrentno = c.carrentno and t.startplace LIKE '%' || #{word} || '%' 
+      </when>
+      <when test="col == 'endplace' ">
+          where m.paymentno = p.paymentno and p.reservationno = r.reservationno and r.rentno = t.rentno
+              and p.payment_cancel = 'N' and t.carrentno = c.carrentno and t.endplace LIKE '%' || #{word} || '%' 
+      </when>
+      <when test="col == 'userno' ">
+          where m.paymentno = p.paymentno and p.reservationno = r.reservationno and r.rentno = t.rentno
+              and p.payment_cancel = 'N' and t.carrentno = c.carrentno and r.userno LIKE '%' || #{word} || '%' 
+      </when>
+      <otherwise>
+      where m.paymentno = p.paymentno and p.reservationno = r.reservationno and r.rentno = t.rentno
+              and p.payment_cancel = 'N' and t.carrentno = c.carrentno
+      </otherwise>
+    </choose>
+    )
+     where <![CDATA[ r >= #{startNum} and r <= #{endNum} ]]>
+</select>
+
+
+<select id="search_count" resultType="int" parameterType="HashMap">
+  select count(*) as cnt
+  from management
+</select>
+
+<!-- 차량 상태 업데이트 -->
+<update id="management_state_rent" parameterType="int">
+    UPDATE management
+    SET management_state = '대여중'
+    WHERE managementno = #{managementno}
+  </update>
+
+<!-- 반납 상태 업데이트 -->
+<update id="management_state_return" parameterType="int">
+    UPDATE management
+    SET management_state = '반납'
+    WHERE managementno = #{managementno}
+  </update>
+
+ </mapper>
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 

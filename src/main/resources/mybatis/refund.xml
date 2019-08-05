@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+ 
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="dev.mvc.refund.RefundDAOInter">
+
+  <insert id="create" parameterType="RefundVO"> 
+ INSERT INTO refund(refundno, paymentno, refund_reason, rdate)
+VALUES((SELECT NVL(MAX(refundno), 0) +1 AS refundno FROM refund), #{paymentno}, #{refund_reason}, sysdate)
+  </insert>
+ </mapper>
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 

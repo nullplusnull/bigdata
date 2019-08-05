@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace = "dev.mvc.user.UserDAOInter">
+
+<select id="checkId" resultType="int" parameterType="String">
+  SELECT COUNT(userid) as cnt
+  FROM rent_user
+  WHERE userid= #{userid}
+</select>
+
+<select id="checkTel" resultType="int" parameterType="String">
+  SELECT COUNT(usertel) as cnt
+  FROM rent_user
+  WHERE usertel= #{usertel}
+</select>
+
+<insert id="create" parameterType="userVO">
+  INSERT INTO rent_user(userno, userid, username, userpasswd, userzipcode, useraddress1, useraddress2, usertel, userage,
+                               usersex, userlicense, userstatus, rdate, licensefile, userthumb, usersize)
+  VALUES((SELECT NVL(MAX(userno), 0) +1 AS userno FROM rent_user), 
+                              #{userid}, #{username}, #{userpasswd}, #{userzipcode}, #{useraddress1}, #{useraddress2},
+                               #{usertel}, #{userage}, #{usersex}, #{userlicense}, 'H', sysdate, #{licensefile}, #{userthumb}, #{usersize})
+</insert>
+
+
+<select id="list" resultType="userVO">
+  SELECT userno, userid, username, userpasswd, userzipcode, useraddress1, useraddress2,
+            usertel, userage, usersex, userlicense, userstatus, rdate, licensefile, userthumb, usersize
+  FROM rent_user
+  ORDER BY userno ASC
+</select>
+
+<select id="read" resultType="userVO" parameterType="int">
+  SELECT userno, userid, username, userpasswd, userzipcode, useraddress1, useraddress2,
+            usertel, userage, usersex, userlicense, userstatus, rdate, licensefile, userthumb, usersize
+  FROM rent_user
+  WHERE userno = #{userno}
+</select>
+ 
+<select id="readById" resultType="userVO" parameterType="String">
+  SELECT userno, userid, username, userpasswd, userzipcode, useraddress1, useraddress2,
+            usertel, userage, usersex, userlicense, userstatus, rdate, licensefile, userthumb, usersize
+  FROM rent_user
+  WHERE userid = #{userid}
+</select>
+
+<select id="findId" resultType="userVO" parameterType="String">
+  SELECT userid, username, usertel
+  FROM rent_user
+  WHERE username = #{username} AND usertel = #{usertel}
+</select>
+
+<select id="findPw" resultType="userVO" parameterType="String">
+  SELECT userid, username, usertel, userpasswd
+  FROM rent_user
+  WHERE username = #{username} AND usertel = #{usertel} AND userid= #{userid}
+</select>
+ 
+<update id="update" parameterType="userVO">
+  UPDATE rent_user 
+  SET username=#{username}, usertel=#{usertel}, userzipcode=#{userzipcode},
+        useraddress1=#{useraddress1}, useraddress2=#{useraddress2}, licensefile=#{licensefile},
+        usersize=#{usersize}, userthumb=#{userthumb}
+  WHERE userno=#{userno}
+</update>  
+
+<update id="passwd_update" parameterType="Hashmap" >
+  UPDATE rent_user
+  SET userpasswd=#{userpasswd}
+  WHERE userno=#{userno}
+</update>
+
+<delete id="delete" parameterType="int">
+  DELETE FROM rent_user
+  WHERE userno=#{userno}
+</delete>
+
+
+<select id="login"  resultType="int" parameterType="Hashmap">
+  SELECT COUNT(*) as cnt
+  FROM rent_user
+  WHERE userid=#{userid} AND userpasswd=#{userpasswd}
+</select>
+
+<!-- 카테고리별 검색된 레코드 갯수 -->
+  <select id="search_count" resultType="int" parameterType="HashMap">
+    SELECT COUNT(*) as cnt
+    FROM rent_user
+  </select>
+
+<!-- 카테고리별 검색된 레코드 목록 + 페이징 + 답변 -->
+  <select id="list_by_paging" resultType="UserVO" parameterType="HashMap">
+    SELECT userno, userid, username, userpasswd, userzipcode, useraddress1, useraddress2,
+              usertel, userage, usersex, userlicense, userstatus, rdate, licensefile, userthumb, usersize, r
+    FROM(
+         SELECT userno, userid, username, userpasswd, userzipcode, useraddress1, useraddress2,
+                   usertel, userage, usersex, userlicense, userstatus, rdate, licensefile, userthumb, usersize,  rownum as r
+         FROM(
+                  SELECT userno, userid, username, userpasswd, userzipcode, useraddress1, useraddress2,
+                  usertel, userage, usersex, userlicense, userstatus, rdate, licensefile, userthumb, usersize
+                  FROM rent_user
+                  ORDER BY userno ASC
+                  )
+          )
+     WHERE <![CDATA[r >= #{startNum} AND r <= #{endNum}]]>
+    <!-- WHERE r >=1 AND r <= 3; -->
+  </select>
+
+
+</mapper> 
+ 

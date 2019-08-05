@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+ 
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="dev.mvc.rentperiod.RentperiodDAOInter">
+  <!-- 등록 -->
+  <insert id="create" parameterType="RentperiodVO">
+    <!-- INSERT INTO RENTPERIOD(rentno,
+                                      carrentno, startday, endday, startplace, endplace)
+     VALUES((SELECT NVL(MAX(rentno), 0)+1 as rentno FROM rentperiod),
+              #{carrentno}, #{startday}, #{endday}, #{startplace}, #{endplace})   -->       
+   INSERT INTO RENTPERIOD(rentno,
+                                      carrentno, startday, endday, startplace, endplace)
+     VALUES((SELECT NVL(MAX(rentno), 0)+1 as rentno FROM rentperiod),
+              #{carrentno},  to_date(#{startday},'YYYY-MM-DD HH24:MI:SS'),
+               to_date(#{endday},'YYYY-MM-DD HH24:MI:SS') , #{startplace}, #{endplace})
+              
+                  
+  </insert>
+
+  <!-- Join 예약 조회 -->
+   <select id="read_by_join" resultType="Carrent_RentperiodVO" parameterType="int">
+     select r.startday, r.endday, c.power, c.carname, c.price, (r.endday - r.startday)*24 as hour, (r.endday - r.startday)*24* c.price as total_price
+      from carrent c, rentperiod r
+      where c.carrentno = r.carrentno and rentno=#{rentno}
+   </select> 
+  
+  <!-- 조회 -->
+   <select id="read" resultType="RentperiodVO" parameterType="int">
+     select rentno, carrentno, startday, endday, startplace, endplace, scheduleday
+      from rentperiod
+      where rentno=#{rentno}
+   </select> 
+   
+   <!-- 예약 날짜를 통해 조회 (슈퍼키 생성)-->
+   <select id="day_read" resultType="RentperiodVO" parameterType="HashMap">
+     select rentno, carrentno, startday, endday, startplace, endplace, scheduleday
+      from rentperiod
+      where carrentno=#{carrentno} AND startday = to_date(#{startday},'YYYY-MM-DD HH24:MI:SS') AND
+             endday = to_date(#{endday},'YYYY-MM-DD HH24:MI:SS')
+   </select> 
+   
+  <!-- count 조회 -->
+   <select id="check_rentperiod" resultType="int" parameterType="HashMap">
+       SELECT count(rentno) as cnt
+       FROM rentperiod
+       where startday &gt;= to_date(#{startday},'YYYY-MM-DD HH24:MI:SS') AND endday &lt;= to_date(#{endday},'YYYY-MM-DD HH24:MI:SS') AND carrentno=#{carrentno}
+   </select> 
+
+
+  <!-- 반납시간 업데이트 -->
+  <!-- 차량 대여 -->
+  <update id='schedule_update' parameterType="int">
+    UPDATE rentperiod
+    SET scheduleday= sysdate
+    WHERE rentno = #{rentno}
+  </update>
+
+
+ </mapper>
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 

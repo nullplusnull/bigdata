@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="dev.mvc.reservation.ReservationDAOInter">
+
+
+<!-- 전체 목록 조회 -->
+  <select id="list" resultType="ReservationVO">
+
+      SELECT reservationno, reservation_state, rentno, userno
+      FROM reservation
+      ORDER BY reservationno ASC
+  </select>
+  
+  
+  <!-- 조회 -->
+  <select id="read_by_reservationno" resultType="ReservationVO" parameterType="int">
+
+      SELECT reservationno, reservation_state, rentno, userno
+      FROM reservation
+      WHERE reservationno = #{reservationno}
+  </select>
+  
+   <!-- 조회2 -->
+  <select id="read_by_rentno" resultType="ReservationVO" parameterType="int">
+
+      SELECT reservationno, reservation_state, rentno, userno
+      FROM reservation
+      WHERE rentno = #{rentno}
+  </select>
+  
+  
+  <!-- 등록 -->
+  <insert id="create" parameterType="ReservationVO">     
+   <!-- INSERT INTO RENTPERIOD(rentno,
+                                      carrentno, startday, endday, startplace, endplace)
+     VALUES((SELECT NVL(MAX(rentno), 0)+1 as rentno FROM rentperiod),
+              #{carrentno},  to_date(#{startday},'YYYY-MM-DD HH24:MI:SS'),
+               to_date(#{endday},'YYYY-MM-DD HH24:MI:SS') , #{startplace}, #{endplace}) -->
+     INSERT INTO reservation(reservationno, reservation_state, rentno, userno, rdate)
+     VALUES((SELECT NVL(MAX(reservationno), 0)+1 as reservationno FROM reservation),  #{reservation_state}, #{rentno}, #{userno}, sysdate )
+                  
+  </insert>
+  
+  <!-- 예약 상태 업데이트 -->
+  <update id='update_state' parameterType="ReservationVO">
+    UPDATE reservation
+    SET        reservation_state= #{reservation_state}
+    WHERE   reservationno=#{reservationno}
+  </update>
+  
+
+ <!-- 해당일에 예약(결제완료된 상태)이 존재하는지 확인 -->
+  <select id="read_day" resultType="Reservation_RentperiodVO" parameterType="int">
+      select p.startday, p.endday, p.carrentno
+      from rentperiod p, reservation r
+      where p.rentno = r.rentno and reservationno=#{reservationno}
+  </select>
+  
+  
+  <!-- count 조회 -->
+   <select id="check_rentperiod" resultType="int" parameterType="HashMap">
+       select count(*)
+      from rentperiod rp, RESERVATION r
+      where r.rentno = rp.rentno and carrentno=#{carrentno} and
+        rp.startday &gt;= to_date( #{startday} ,'YYYY-MM-DD HH24:MI:SS') and
+       rp.endday &lt;= to_date(#{endday},'YYYY-MM-DD HH24:MI:SS') and (r.reservation_state = '예약 대기' or r.reservation_state = '예약 완료' )
+   </select>
+   
+   <!-- count 조회 payment단계 -->
+   <select id="check_rentperiod_payment" resultType="int" parameterType="HashMap">
+       select count(*)
+      from rentperiod rp, RESERVATION r
+      where r.rentno = rp.rentno and carrentno=#{carrentno} and
+        rp.startday &gt;= to_date( #{startday} ,'YYYY-MM-DD HH24:MI:SS') and
+       rp.endday &lt;= to_date(#{endday},'YYYY-MM-DD HH24:MI:SS') and (r.reservation_state = '예약 대기')
+   </select>
+  
+  
+
+  
+  </mapper>
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  

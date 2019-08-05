@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+ 
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="dev.mvc.coupon.CouponDAOInter">
+  <insert id="create" parameterType="CouponVO">
+  INSERT INTO COUPON(couponno, couponname, use_condition, expiry_date, discount_cost,coupon_file,file_size, thumb, rdate)
+  VALUES((SELECT NVL(MAX(couponno), 0)+1 as couponno FROM coupon),  #{couponname},
+   #{use_condition}, #{expiry_date} , #{discount_cost}, #{coupon_file}, #{file_size}, #{thumb} ,sysdate )
+  </insert>
+
+
+  <!-- 전체 목록 조회 -->
+  <select id="list" resultType="CouponVO">
+
+    SELECT couponno, couponname, use_condition, expiry_date, discount_cost,coupon_file,file_size, rdate, thumb, visible
+    FROM COUPON
+    ORDER BY
+    couponno ASC
+  </select>
+  
+  <!-- 전체 목록 조회2 -->
+  <select id="open_list" resultType="CouponVO">
+
+    SELECT couponno, couponname, use_condition, expiry_date, discount_cost,coupon_file,file_size, rdate, thumb, visible
+    FROM COUPON
+    where visible = 'Y'
+    ORDER BY
+    couponno ASC
+  </select>
+  
+  
+    <!-- 조회 -->
+  <select id='read' resultType="CouponVO" parameterType="int">
+   SELECT couponno, couponname, use_condition, expiry_date, discount_cost,coupon_file,file_size, rdate,thumb, visible
+    FROM COUPON
+    WHERE couponno = #{couponno}
+  </select>
+  
+  
+  <!-- 수정 -->
+  <update id='update' parameterType="CouponVO">
+    UPDATE coupon
+    SET couponname= #{couponname}, use_condition= #{use_condition}, 
+      expiry_date=#{expiry_date}, discount_cost=#{discount_cost}, coupon_file=#{coupon_file}, file_size=#{file_size},
+       thumb=#{thumb}, visible=#{visible}
+    WHERE couponno = #{couponno}
+  </update>
+
+
+   <!-- 삭제 -->
+  <delete id="delete" parameterType="int">  
+  DELETE FROM coupon
+  WHERE couponno=#{couponno}
+ </delete>
+
+
+
+
+
+
+ </mapper>

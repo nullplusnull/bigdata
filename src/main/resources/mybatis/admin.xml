@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace = "dev.mvc.admin.AdminDAOInter">
+
+<select id="readById" resultType="adminVO" parameterType="String">
+  SELECT adminno, adminid, adminname, adminpasswd,
+            admintel, adminemail, rdate
+  FROM rent_admin
+  WHERE adminid = #{adminid}
+</select>
+
+
+<select id="login"  resultType="int" parameterType="Hashmap">
+  SELECT COUNT(*) as cnt
+  FROM rent_admin
+  WHERE adminid=#{adminid} AND adminpasswd=#{adminpasswd}
+</select>
+
+
+
+</mapper> 
+ 

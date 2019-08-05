@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+ 
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="dev.mvc.payment.PaymentDAOInter">
+
+  <insert id="create" parameterType="PaymentVO"> 
+ INSERT INTO payment(paymentno, payment_price, payment_method, payment_method_num, payment_cancel, reservationno, userno)
+VALUES((SELECT NVL(MAX(paymentno), 0) +1 AS paymentno FROM payment), #{payment_price},
+                 #{payment_method}, #{payment_method_num}, #{payment_cancel}, #{reservationno}, #{userno})     
+  </insert>
+
+  <!-- 계좌 조회 -->
+<select id="read_paymentno" resultType="int" parameterType="int" >
+  SELECT paymentno
+  FROM payment
+  WHERE reservationno = #{reservationno}
+  </select>
+
+
+ <!-- mypage 결제목록 조회 -->
+ <select id="reservation_payment_list" resultType="Reservation_PaymentVO" parameterType="int" >
+  select r.deposit, r.reservation_state, r.rentno, p.payment_price, p.payment_method, p.payment_cancel
+from reservation r, payment p
+where r.reservationno = p.reservationno and p.userno=#{userno}
+  </select>
+
+
+<!-- 나의 예약/결제 List -->
+<select id="my_reservation_pay_list" resultType="TotalVO" parameterType="int" >
+  select c.carname, c.power, 
+   r.reservation_state, 
+  t.startday, t.endday, (t.endday-t.startday)*24 as hour,
+   p.payment_price, p.paymentno, r.rdate
+from payment p, reservation r, rentperiod t, carrent c
+where p.reservationno = r.reservationno and t.rentno = r.rentno
+and t.carrentno = c.carrentno and r.userno = #{userno}
+  </select>
+
+<!-- 나의 예약/결제 READ -->
+<select id="my_reservation_pay_read" resultType="TotalVO" parameterType="int" >
+  select c.carname, c.power, 
+  r.rdate, r.reservation_state, r.userno,
+  t.startday, t.endday, (t.endday-t.startday)*24 as hour,
+   p.payment_price, p.paymentno, p.payment_cancel
+from payment p, reservation r, rentperiod t, carrent c
+where p.reservationno = r.reservationno and t.rentno = r.rentno
+and t.carrentno = c.carrentno and p.paymentno = #{paymentno}
+  </select>
+  
+  
+    <!-- 결제 수단 확인  -->
+ <select id="pay_method" resultType="PaymentVO" parameterType="int" >
+  SELECT payment_method_num, payment_method, reservationno
+  FROM payment
+  WHERE paymentno = #{paymentno}
+  </select>
+
+
+<!-- 구매 환불로 인한 금액 변경 -->
+<update id="pay_cancel" parameterType="int">
+    UPDATE payment
+    SET payment_cancel= 'Y'
+    WHERE paymentno = #{paymentno}
+</update>
+
+ </mapper>
+ 
+ 
+ 
+ 
+ 
+ 
+ 
