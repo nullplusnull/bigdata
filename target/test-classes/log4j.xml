@@ -11,7 +11,7 @@
 	</appender>
 	
 	<!-- Application Loggers -->
-	<logger name="dev.mvc.test">
+	<logger name="dev.mvc.rent">
 		<level value="info" />
 	</logger>
 	
