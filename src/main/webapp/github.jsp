@@ -7,7 +7,7 @@
 <title></title> 
 </head>
 <body>
-<H1>Github 실습 왕눈이111 연습 11111 </H1>
+<H1>Github 실습 왕눈이 아로미 </H1>
 </body>
 </html>
  
